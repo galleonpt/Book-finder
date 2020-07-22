@@ -5,8 +5,7 @@ const {
 const book = require("../models/book");
 
 module.exports = {
-
-  //adicionar um livro
+  //add a book
   async create(request, response) {
     try {
       const book = await Book.create(request.body);
@@ -17,12 +16,10 @@ module.exports = {
     }
   },
 
-  //mostrar o livro com um nome especifico
-  async show(request, response) {
+  //show all books
+  async showAll(request, response) {
     try {
-      const title = request.query;
-
-      const books = await Book.find(title);
+      const books = await Book.find()
 
       return response.json(books);
     } catch (e) {
@@ -30,29 +27,41 @@ module.exports = {
     }
   },
 
+  //show only 1 book by giving his title
+  async index(request, response) {
+    try {
+      const books = await Book.find(request.query);
+
+      return response.json(books);
+    } catch (e) {
+      return response.send(e);
+    }
+  },
+
+  //update data
   async update(request, response) {
     try {
+      const books = await Book.findByIdAndUpdate(
+        request.query.id,
+        request.body, {
+          new: true,
+        }
+      );
 
-      //funciona
-
-      const books = await Book.findByIdAndUpdate(request.query.id, request.body, {
-        new: true,
-      })
-
-      return response.status(200).json(books)
-      // const books = await Book.find(title)
-
-      // const updatedBooks = books.map((item) => {
-      //   return {
-
-      //     ...item,
-      //     description: "descricao alterada",
-      //   }
-      // })
-
-      // return response.status(200).json(updatedBooks)
+      return response.status(200).json(books);
     } catch (e) {
-      response.status(400).send(e)
+      response.status(400).send(e);
     }
-  }
+  },
+
+  //deleting a book giving his id
+  async delete(request, response) {
+    try {
+      const book = await Book.findByIdAndDelete(request.query.id)
+
+      return response.status(200).json(book);
+    } catch (e) {
+      response.status(400).send(e);
+    }
+  },
 };
