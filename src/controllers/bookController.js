@@ -1,16 +1,18 @@
 const Book = require("../models/book");
-const {
-  update
-} = require("../models/book");
-const book = require("../models/book");
 
 module.exports = {
   //add a book
   async create(request, response) {
     try {
-      const book = await Book.create(request.body);
 
-      return response.status(201).json(book);
+      const book = {
+        ...request.body,
+        cover: request.file.filename
+      }
+
+      const savedbook = await Book.create(book);
+
+      return response.status(201).json(savedbook);
     } catch (e) {
       return response.status(500).send(e);
     }
@@ -21,12 +23,19 @@ module.exports = {
     try {
       const books = await Book.find()
 
-      if (!books)
+      if (!books || books.length === 0)
         return response.json({
           message: "Books not found"
         }).status(400)
 
-      return response.status(200).json(books);
+      const serializedBooks = books.map(book => {
+        return {
+          ...book.toObject(),
+          cover: `http://192.168.1.7:3333/uploads/${book.cover}`
+        }
+      })
+
+      return response.status(200).json(serializedBooks);
     } catch (e) {
       return response.send(e);
     }
@@ -37,7 +46,6 @@ module.exports = {
     try {
       const {
         title,
-        description,
         author,
         price_min,
         price_max,
@@ -45,7 +53,6 @@ module.exports = {
 
       const book = await Book.find({
         title: new RegExp(title),
-        description: new RegExp(description),
         author: new RegExp(author),
         price: {
           $gte: price_min,
@@ -54,11 +61,16 @@ module.exports = {
       })
 
       if (!book || book.length === 0)
-        return response.json({
+        return response.status(400).json({
           message: "Book not found",
-        }).status(400)
+        })
 
-      return response.json(book);
+      const serializedBook = {
+        ...book,
+        cover: `http://192.168.1.7:3333/uploads/${book.cover}`
+      }
+
+      return response.json(serializedBook);
     } catch (e) {
       return response.send(e);
     }

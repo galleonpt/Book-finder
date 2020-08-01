@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv")
+const path = require("path")
 
 const routes = require("./routes");
 
@@ -19,5 +20,7 @@ mongoose.connect(
 
 app.use(express.json());
 app.use(routes);
+
+app.use("/uploads", express.static(path.resolve(__dirname, "..", "uploads")));
 
 app.listen(3333);

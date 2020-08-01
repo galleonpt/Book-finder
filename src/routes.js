@@ -3,10 +3,15 @@ const router = express.Router();
 
 const BookController = require("./controllers/bookController");
 
-router.get("/", BookController.index);
-router.get("/", BookController.showAll);
+const multer = require("multer");
+const multerConfig = require("./config/multer")
 
-router.post("/", BookController.create);
+const upload = multer(multerConfig)
+
+router.get("/", BookController.index);
+router.get("/all", BookController.showAll);
+
+router.post("/", upload.single("cover"), BookController.create);
 
 router.put("/", BookController.update);
 
